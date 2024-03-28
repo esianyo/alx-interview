@@ -16,18 +16,19 @@ def minOperations(n):
         The minimum number of operations, or 0 if n is not achievable.
     """
 
-    operations = 0
-    curr_len = 1  # Start with 1 character
+    if n <= 1:
+        return 0
 
-    while curr_len < n:
-        # Find largest power of 2 less than or equal to difference
-        diff = n - curr_len
-        largest_power_of_2 = 1
-        while largest_power_of_2 * 2 <= diff:
-            largest_power_of_2 *= 2
+    operations = n
 
-        # Increment operations, paste, and update current length
-        operations += 1
-        curr_len += largest_power_of_2
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            operations = min(operations, i + minOperations(n // i))
 
     return operations
+
+
+if __name__ == "__main__":
+    # Example usage:
+    n = 9
+    print("Number of operations for", n, "characters:", minOperations(n))
