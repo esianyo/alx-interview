@@ -1,67 +1,47 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
+
+"""
+Log Parsing
+"""
+
 import sys
-from collections import defaultdict
 
 
-def is_valid_line(line):
-    """
-    Checks if the line follows the expected format.
-    """
-    try:
-        # Split based on spaces, ensuring there are at least 7 parts
-        parts = line.split()
-        if len(parts) < 7:
-            return False
-
-        # Check IP address format (basic validation)
-        if not all(0 <= int(part) <= 255 for part in parts[:4]):
-            return False
-
-        # Check status code is an integer
-        int(parts[5])
-        int(parts[6])
-        return True
-    except ValueError:
-        return False
+def print_stats(status_code_counts, total_size):
+    """Prints information"""
+    print("File size: {:d}".format(total_size))
+    for code in sorted(status_code_counts.keys()):
+        if status_code_counts[code] != 0:
+            print("{}: {:d}".format(code, status_code_counts[code]))
 
 
-def parse_line(line):
-    """
-    Extracts relevant information from a valid line.
-    """
-    return int(line.split()[-1])
+status_code_counts = {"200": 0, "301": 0, "400": 0, "401": 0, "403": 0,
+                      "404": 0, "405": 0, "500": 0}
 
-
-def print_stats(total_size, status_counts):
-    """
-    Prints the total file size and status code counts.
-    """
-    print(f"Total file size: {total_size}")
-
-    for code, count in sorted(status_counts.items()):
-        print(f"{code}: {count}")
-
-
+count = 0
 total_size = 0
-status_counts = defaultdict(int)
-line_count = 0
 
-for line in sys.stdin:
-    line_count += 1
+try:
+    for line in sys.stdin:
+        if count != 0 and count % 10 == 0:
+            print_stats(status_code_counts, total_size)
 
-    if not is_valid_line(line):
-        continue
+        line_list = line.split()
+        count += 1
 
-    file_size = parse_line(line)
-    total_size += file_size
-    status_counts[int(line.split()[5])] += 1
+        try:
+            total_size += int(line_list[-1])
+        except ValueError:
+            pass
 
-    # Print statistics every 10 lines or on keyboard interrupt
-    if line_count % 10 == 0 or line_count == 1:
-        print_stats(total_size, status_counts)
-        status_counts.clear()  # Reset counts for the next batch
+        try:
+            if line_list[-2] in status_code_counts:
+                status_code_counts[line_list[-2]] += 1
+        except IndexError:
+            pass
 
+    print_stats(status_code_counts, total_size)
 
-# Print final statistics after processing all lines
-if line_count > 0:
-    print_stats(total_size, status_counts)
+except KeyboardInterrupt:
+    print_stats(status_code_counts, total_size)
+    raise
