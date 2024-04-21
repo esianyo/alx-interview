@@ -3,41 +3,47 @@
 const request = require('request');
 const movieId = process.argv[2];
 
-if (!movieId || isNaN(parseInt(movieId))) {
-  console.error('Usage: ./0-starwars_characters.js movieId');
-  process.exit(1);
-}
+const getMovieCharacters = (movieId) => {
+  return new Promise((resolve, reject) => {
+    const options = {
+      url: `https://swapi-api.hbtn.io/api/films/${movieId}`,
+      method: 'GET'
+    };
 
-const apiUrl = `https://swapi.dev/api/films/${movieId}/`;
-
-request(apiUrl, (error, response, body) => {
-  if (error) {
-    console.error('Error:', error);
-    process.exit(1);
-  }
-
-  if (response.statusCode !== 200) {
-    console.error('Invalid response:', response.statusCode);
-    process.exit(1);
-  }
-
-  const film = JSON.parse(body);
-  const characters = film.characters;
-
-  characters.forEach((characterUrl) => {
-    request(characterUrl, (error, response, body) => {
-      if (error) {
-        console.error('Error:', error);
-        process.exit(1);
+    request(options, function (error, response, body) {
+      if (!error && response.statusCode === 200) {
+        const characters = JSON.parse(body).characters;
+        resolve(characters);
+      } else {
+        reject(error || response.statusCode);
       }
-
-      if (response.statusCode !== 200) {
-        console.error('Invalid response:', response.statusCode);
-        process.exit(1);
-      }
-
-      const character = JSON.parse(body);
-      console.log(character.name);
     });
   });
-});
+};
+
+const getCharacterName = (characterUrl) => {
+  return new Promise((resolve, reject) => {
+    request(characterUrl, function (error, response, body) {
+      if (!error && response.statusCode === 200) {
+        const name = JSON.parse(body).name;
+        resolve(name);
+      } else {
+        reject(error || response.statusCode);
+      }
+    });
+  });
+};
+
+const printMovieCharacters = async (movieId) => {
+  try {
+    const characters = await getMovieCharacters(movieId);
+    for (const characterUrl of characters) {
+      const name = await getCharacterName(characterUrl);
+      console.log(name);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
+printMovieCharacters(movieId);
