@@ -1,29 +1,43 @@
 #!/usr/bin/node
 
-const request = require('request-promise');
+const request = require('request');
 const movieId = process.argv[2];
 
 if (!movieId || isNaN(parseInt(movieId))) {
-  console.error('Usage: ./0-starwars_characters.js <movie_id>');
+  console.error('Usage: ./0-starwars_characters.js movieId');
   process.exit(1);
 }
 
 const apiUrl = `https://swapi.dev/api/films/${movieId}/`;
 
-async function getCharacters() {
-  try {
-    const response = await request(apiUrl);
-    const film = JSON.parse(response);
-    const characters = film.characters;
-
-    for (const characterUrl of characters) {
-      const characterResponse = await request(characterUrl);
-      const character = JSON.parse(characterResponse);
-      console.log(character.name);
-    }
-  } catch (error) {
+request(apiUrl, (error, response, body) => {
+  if (error) {
     console.error('Error:', error);
+    process.exit(1);
   }
-}
 
-getCharacters();
+  if (response.statusCode !== 200) {
+    console.error('Invalid response:', response.statusCode);
+    process.exit(1);
+  }
+
+  const film = JSON.parse(body);
+  const characters = film.characters;
+
+  characters.forEach((characterUrl) => {
+    request(characterUrl, (error, response, body) => {
+      if (error) {
+        console.error('Error:', error);
+        process.exit(1);
+      }
+
+      if (response.statusCode !== 200) {
+        console.error('Invalid response:', response.statusCode);
+        process.exit(1);
+      }
+
+      const character = JSON.parse(body);
+      console.log(character.name);
+    });
+  });
+});
