@@ -32,8 +32,12 @@ def island_perimeter(grid):
     """
 
     # Validate input grid format
-    if not isinstance(grid, list) or not all(isinstance(row, list) and all(isinstance(cell, int) for cell in row) for row in grid):
-        raise ValueError("Invalid grid format. Grid must be a 2D list of integers.")
+    if not isinstance(grid, list) or not all(
+        isinstance(row, list) and all(
+            isinstance(cell, int) for cell in row) for row in grid):
+        raise ValueError(
+            "Invalid grid format. Grid must be a 2D list of integers."
+            )
 
     rows = len(grid)
     cols = len(grid[0])
