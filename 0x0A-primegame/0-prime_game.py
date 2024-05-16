@@ -1,7 +1,15 @@
 #!/usr/bin/python3
 
+
 def isWinner(x, nums):
     def is_prime(n):
+        """
+        Checks if a number is prime.
+        Args:
+            n: The number to check for primality.
+        Returns:
+            True if the number is prime, False otherwise.
+        """
         if n < 2:
             return False
         for i in range(2, int(n ** 0.5) + 1):
@@ -10,6 +18,16 @@ def isWinner(x, nums):
         return True
 
     def get_primes(n):
+        """
+        Determines if a player can win a round based
+        on their previously won primes.
+        Args:
+            primes: A list of prime numbers the
+            player has won in previous rounds.
+            n: The number to check for winnability.
+        Returns:
+            True if the player can win the round, False otherwise.
+        """
         primes = []
         for i in range(2, n + 1):
             if is_prime(i):
@@ -17,6 +35,16 @@ def isWinner(x, nums):
         return primes
 
     def can_win(primes, n):
+        """
+        Determines if a player can win a round
+        based on their previously won primes.
+        Args:
+            primes: A list of prime numbers the
+            player has won in previous rounds.
+            n: The number to check for winnability.
+        Returns:
+            True if the player can win the round, False otherwise.
+        """
         if n in primes:
             return True
         for prime in primes:
